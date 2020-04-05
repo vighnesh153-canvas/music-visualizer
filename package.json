@@ -13,5 +13,18 @@
   "dependencies": {
     "sass": "^1.26.3",
     "typescript": "^3.8.3"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vighnesh153-canvas/music-visualizer.git"
+  },
+  "keywords": [
+    "music",
+    "visualizer"
+  ],
+  "bugs": {
+    "url": "https://github.com/vighnesh153-canvas/music-visualizer/issues"
+  },
+  "homepage": "https://github.com/vighnesh153-canvas/music-visualizer#readme"
 }
