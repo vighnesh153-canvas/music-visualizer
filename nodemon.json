@@ -1,5 +1,0 @@
-{
-  "watch": ["ts", "scss"],
-  "ext": "scss|ts",
-  "exec": "sass --no-source-map --watch scss:css & tsc -w"
-}

@@ -4,7 +4,11 @@
   "description": "a music visualizer",
   "main": "ts/index.js",
   "scripts": {
-    "start": "nodemon",
+    "start": "npm run watch:all & npm run live-server",
+    "watch:scss": "sass --no-source-map --watch scss:css",
+    "watch:ts": "tsc -w",
+    "watch:all": "npm run watch:scss & npm run watch:ts",
+    "live-server": "live-server --port=4200",
     "build": "sass scss:css & tsc",
     "deploy-prep": "mkdir deploy-out & mv index.html deploy-out & mv js deploy-out & mv css deploy-out"
   },
@@ -14,7 +18,9 @@
     "sass": "^1.26.3",
     "typescript": "^3.8.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "live-server": "^1.2.1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vighnesh153-canvas/music-visualizer.git"
