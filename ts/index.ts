@@ -6,6 +6,8 @@ import { ICanvasAnimation } from "./IAnimation";
 
     let analyzer: AnalyserNode;
     let animationRunning = true;
+    let isInit = true;
+    let audioElement: HTMLAudioElement;
     const byteFrequencyDataArray = new Uint8Array(1024);
     const byteTimeDomainDataArray = new Uint8Array(1024);
 
@@ -19,6 +21,18 @@ import { ICanvasAnimation } from "./IAnimation";
     };
 
     const animateAll = () => {
+        if (isInit) {
+            const audioContext = new AudioContext();
+            analyzer = audioContext.createAnalyser();
+
+            const audioSource = audioContext.createMediaElementSource(audioElement);
+            audioSource.connect(analyzer);
+            analyzer.connect(audioContext.destination);
+
+
+            isInit = false;
+        }
+
         animationRunning = true;
         analyzer.fftSize = 2048;
         analyzer.smoothingTimeConstant = 0.9;
@@ -37,14 +51,7 @@ import { ICanvasAnimation } from "./IAnimation";
     window.onload = () => {
         console.log('App bootstrapping!');
 
-        const audioContext = new AudioContext();
-        analyzer = audioContext.createAnalyser();
-
-        const audioElement = document.querySelector('audio');
-        const audioSource = audioContext.createMediaElementSource(audioElement);
-        audioSource.connect(analyzer);
-        analyzer.connect(audioContext.destination);
-
+        audioElement = document.querySelector('audio');
         audioElement.addEventListener('play', animateAll);
         audioElement.addEventListener('pause', stopAllAnimations);
 
