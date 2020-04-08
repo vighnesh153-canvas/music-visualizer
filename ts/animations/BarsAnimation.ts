@@ -1,6 +1,6 @@
-import { Canvas } from "./Canvas";
-import { ICanvasAnimation } from "./IAnimation";
-import {mapBigArrayToSmallSize} from "./Utility";
+import { Canvas } from "../Canvas";
+import { ICanvasAnimation } from "../IAnimation";
+import {mapBigArrayToSmallSize} from "../Utility";
 
 export class BarsAnimation implements ICanvasAnimation {
     private fftSize = 512;

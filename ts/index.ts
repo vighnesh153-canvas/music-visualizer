@@ -1,8 +1,9 @@
 import { ICanvasAnimation } from "./IAnimation";
 
 (async () => {
-    const { BarsAnimation } = await import('./BarsAnimation');
-    const { SinusoidalWaveAnimation } = await import('./SinusoidalWaveAnimation');
+    const { BarsAnimation } = await import('./animations/BarsAnimation');
+    const { SinusoidalWaveAnimation } = await import('./animations/SinusoidalWaveAnimation');
+    const { CircularAnimation } = await import('./animations/CircularAnimation');
 
     let analyzer: AnalyserNode;
     let animationRunning = true;
@@ -13,7 +14,8 @@ import { ICanvasAnimation } from "./IAnimation";
 
     const allAnimations: ICanvasAnimation[] = [
         new BarsAnimation(),
-        new SinusoidalWaveAnimation()
+        new SinusoidalWaveAnimation(),
+        new CircularAnimation()
     ];
 
     const stopAllAnimations = () => {
@@ -28,7 +30,6 @@ import { ICanvasAnimation } from "./IAnimation";
             const audioSource = audioContext.createMediaElementSource(audioElement);
             audioSource.connect(analyzer);
             analyzer.connect(audioContext.destination);
-
 
             isInit = false;
         }

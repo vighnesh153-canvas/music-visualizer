@@ -1,5 +1,5 @@
-import {Canvas} from "./Canvas";
-import {ICanvasAnimation} from "./IAnimation";
+import {Canvas} from "../Canvas";
+import {ICanvasAnimation} from "../IAnimation";
 
 export class SinusoidalWaveAnimation implements ICanvasAnimation {
     private helper: Canvas;

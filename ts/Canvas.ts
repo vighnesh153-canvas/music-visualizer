@@ -21,6 +21,10 @@ export class Canvas {
 
         this.canvas = canvas;
         this.canvasContext = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+        this.reset();
+    }
+
+    reset() {
         this.canvasContext.setTransform(1, 0, 0, 1, 0, 0);
     }
 
@@ -77,6 +81,16 @@ export class Canvas {
         this.canvasContext.fillStyle = color;
         this.canvasContext.arc(centerX, centerY, radius, 0, 2 * Math.PI, true);
         this.canvasContext.fill();
+    }
+
+    drawOutlineCircle(centerX: number, centerY: number, radius: number, width: number, color: string) {
+        const originalWidth = this.canvasContext.lineWidth;
+        this.canvasContext.beginPath();
+        this.canvasContext.lineWidth = width;
+        this.canvasContext.strokeStyle = color;
+        this.canvasContext.arc(centerX, centerY, radius, 0, 2 * Math.PI, true);
+        this.canvasContext.stroke();
+        this.canvasContext.lineWidth = originalWidth;
     }
 
     writeText(text: string, x: number, y: number, fontSize: number, color: string) {
