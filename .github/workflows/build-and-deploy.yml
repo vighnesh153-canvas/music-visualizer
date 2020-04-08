@@ -31,16 +31,13 @@ jobs:
       - name: Install dependencies
         run: npm ci   # clean-install
 
-      - name: Build
-        run: npm run build
-
-      - name: Deploy Preparation
-        run: npm run deploy-prep
+      - name: Prepare artifacts
+        run: npm run build-artifacts
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           SSH: true
           BRANCH: gh-pages
-          FOLDER: deploy-out  # folder to be deployed
+          FOLDER: dist  # folder to be deployed
           CLEAN: true

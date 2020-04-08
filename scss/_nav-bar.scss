@@ -1,0 +1,23 @@
+nav {
+  height: 10vh;
+  width: 100%;
+
+  background-color: black;
+}
+
+nav .content {
+  width: 80%;
+  height: 100%;
+
+  margin: auto;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  color: white;
+
+  p {
+    font-size: 5vh;
+  }
+}

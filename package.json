@@ -4,13 +4,16 @@
   "description": "a music visualizer",
   "main": "ts/index.js",
   "scripts": {
+    "cleanup": "rm -rf css js",
     "start": "npm run watch:all & npm run live-server",
-    "watch:scss": "sass --no-source-map --watch scss:css",
-    "watch:ts": "tsc -w",
-    "watch:all": "npm run watch:scss & npm run watch:ts",
+    "watch:scss": "rm -rf css & sass --no-source-map --watch scss/styles.scss:css/bundle.css",
+    "watch:ts": "rm -rf js & mkdir js & touch js/index.js js/bundle.js & tsc -w & watchify js/index.js -o js/bundle.js",
+    "watch:all": "npm run watch:ts & npm run watch:scss",
     "live-server": "live-server --port=4200",
-    "build": "sass scss:css & tsc",
-    "deploy-prep": "mkdir deploy-out & mv index.html deploy-out & mv js deploy-out & mv css deploy-out"
+    "browserify": "browserify js/index.js -o js/bundle.js",
+    "build": "sass --no-source-map scss/styles.scss:css/bundle.css & tsc & npm run browserify",
+    "dist-prep": "rm -rf dist & mkdir dist dist/js dist/css & cp index.html dist/index.html & cp css/bundle.css dist/css/bundle.css & cp js/bundle.js dist/js/bundle.js & mkdir dist/static & cp static/favicon.ico dist/static/favicon.ico",
+    "build-artifacts": "npm run build & npm run dist-prep & npm run cleanup"
   },
   "author": "Vighnesh Raut",
   "license": "ISC",
@@ -19,7 +22,10 @@
     "typescript": "^3.8.3"
   },
   "devDependencies": {
-    "live-server": "^1.2.1"
+    "browserify": "^16.5.1",
+    "frontend-dependencies": "^1.1.8",
+    "live-server": "^1.2.1",
+    "watchify": "^3.11.1"
   },
   "repository": {
     "type": "git",
