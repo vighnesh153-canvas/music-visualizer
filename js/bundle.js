@@ -1,41 +1,6 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const Canvas_1 = require("./Canvas");
-const Utility_1 = require("./Utility");
-class BarsAnimation {
-    constructor() {
-        this.fftSize = 512;
-        this.byteFrequencyDataArray = new Uint8Array(~~(this.fftSize / 2));
-        const canvas = document.getElementById('bars-canvas');
-        this.helper = new Canvas_1.Canvas(canvas);
-    }
-    clearBackground() {
-        const { helper } = this;
-        const { width, height, drawFilledRect } = helper;
-        drawFilledRect(0, 0, width, height, 'black');
-    }
-    drawBars() {
-        const { helper, byteFrequencyDataArray } = this;
-        const { width, height, drawFilledRect } = helper;
-        const barWidth = 1;
-        for (let i = 0; barWidth * i <= width; i++) {
-            const barX = i * 2;
-            const barHeight = byteFrequencyDataArray[i] / 2;
-            drawFilledRect(barX, height - barHeight, barWidth, barHeight, 'white');
-        }
-    }
-    animate(frequency, time) {
-        this.clearBackground();
-        this.byteFrequencyDataArray = Utility_1.mapBigArrayToSmallSize(frequency, 4);
-        this.drawBars();
-    }
-}
-exports.BarsAnimation = BarsAnimation;
-
-},{"./Canvas":2,"./Utility":4}],2:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 class Canvas {
     constructor(canvas) {
         this.drawBitmap = this.drawBitmap.bind(this);
@@ -47,13 +12,16 @@ class Canvas {
         this.writeText = this.writeText.bind(this);
         this.canvas = canvas;
         this.canvasContext = this.canvas.getContext('2d');
-        this.canvasContext.setTransform(1, 0, 0, 1, 0, 0);
+        this.reset();
     }
     get width() {
         return this.canvas.width;
     }
     get height() {
         return this.canvas.height;
+    }
+    reset() {
+        this.canvasContext.setTransform(1, 0, 0, 1, 0, 0);
     }
     drawBitmap(useBitmap, x, y, angle) {
         this.canvasContext.save();
@@ -101,6 +69,15 @@ class Canvas {
         this.canvasContext.arc(centerX, centerY, radius, 0, 2 * Math.PI, true);
         this.canvasContext.fill();
     }
+    drawOutlineCircle(centerX, centerY, radius, width, color) {
+        const originalWidth = this.canvasContext.lineWidth;
+        this.canvasContext.beginPath();
+        this.canvasContext.lineWidth = width;
+        this.canvasContext.strokeStyle = color;
+        this.canvasContext.arc(centerX, centerY, radius, 0, 2 * Math.PI, true);
+        this.canvasContext.stroke();
+        this.canvasContext.lineWidth = originalWidth;
+    }
     writeText(text, x, y, fontSize, color) {
         this.canvasContext.fillStyle = color;
         this.canvasContext.fillText(text, x, y);
@@ -120,10 +97,117 @@ class Canvas {
 }
 exports.Canvas = Canvas;
 
+},{}],2:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.mapBigArrayToSmallSize = (array, size) => {
+    const newArray = new Uint8Array(array.length / size);
+    for (let i = size - 1; i < array.length; i += size) {
+        let sum = 0;
+        for (let j = i - size + 1; j <= i; j++) {
+            sum += array[j];
+        }
+        newArray[~~(i / size)] = sum / size;
+    }
+    return newArray;
+};
+
 },{}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const Canvas_1 = require("./Canvas");
+const Canvas_1 = require("../Canvas");
+const Utility_1 = require("../Utility");
+class BarsAnimation {
+    constructor() {
+        this.fftSize = 512;
+        this.byteFrequencyDataArray = new Uint8Array(~~(this.fftSize / 2));
+        const canvas = document.getElementById('bars-canvas');
+        this.helper = new Canvas_1.Canvas(canvas);
+    }
+    clearBackground() {
+        const { helper } = this;
+        const { width, height, drawFilledRect } = helper;
+        drawFilledRect(0, 0, width, height, 'black');
+    }
+    drawBars() {
+        const { helper, byteFrequencyDataArray } = this;
+        const { width, height, drawFilledRect } = helper;
+        const barWidth = 1;
+        for (let i = 0; barWidth * i <= width; i++) {
+            const barX = i * 2;
+            const barHeight = byteFrequencyDataArray[i] / 2;
+            drawFilledRect(barX, height - barHeight, barWidth, barHeight, 'white');
+        }
+    }
+    animate(frequency, time) {
+        this.clearBackground();
+        this.byteFrequencyDataArray = Utility_1.mapBigArrayToSmallSize(frequency, 4);
+        this.drawBars();
+    }
+}
+exports.BarsAnimation = BarsAnimation;
+
+},{"../Canvas":1,"../Utility":2}],4:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Canvas_1 = require("../Canvas");
+const Utility_1 = require("../Utility");
+class CircularAnimation {
+    constructor() {
+        this.fftSize = 1024;
+        this.baseCircularRadius = 20;
+        this.backGroundColor = 'black';
+        this.byteFrequencyDataArray = new Uint8Array(~~(this.fftSize / 2));
+        this.rotationAngle = 1;
+        const canvas = document.getElementById('circular-animation-canvas');
+        this.helper = new Canvas_1.Canvas(canvas);
+    }
+    clearBackground() {
+        const { helper, backGroundColor } = this;
+        const { width, height, drawFilledRect } = helper;
+        drawFilledRect(0, 0, width, height, backGroundColor);
+    }
+    drawCircle() {
+        const centerX = this.helper.width / 2;
+        const centerY = this.helper.height / 2;
+        this.helper.drawFilledCircle(centerX, centerY, this.baseCircularRadius, 'white');
+        this.helper.drawFilledCircle(centerX, centerY, this.baseCircularRadius - 5, this.backGroundColor);
+    }
+    drawLineAtAngle(sX, sY, length, angle = 0, color = 'white', thickness = 1) {
+        let eX = length * Math.cos(angle);
+        let eY = length * Math.sin(angle);
+        eX += sX;
+        eY += sY;
+        this.helper.drawLine(sX, sY, eX, eY, thickness, color);
+    }
+    drawLines() {
+        for (let i = 0; i < this.byteFrequencyDataArray.length; i++) {
+            const angle = i + this.rotationAngle;
+            const length = this.byteFrequencyDataArray[i] / 4 + this.baseCircularRadius;
+            this.drawLineAtAngle(this.helper.width / 2, this.helper.height / 2, length, angle * Math.PI / 180);
+        }
+        this.rotationAngle += 0.1;
+        this.rotationAngle %= 360;
+    }
+    drawAll() {
+        const originalRadius = this.baseCircularRadius;
+        this.baseCircularRadius += this.byteFrequencyDataArray[180] / 30;
+        this.drawLines();
+        this.drawCircle();
+        this.baseCircularRadius = originalRadius;
+    }
+    animate(frequency, time) {
+        this.clearBackground();
+        this.byteFrequencyDataArray = Utility_1.mapBigArrayToSmallSize(frequency, 2);
+        this.drawAll();
+    }
+}
+exports.CircularAnimation = CircularAnimation;
+
+},{"../Canvas":1,"../Utility":2}],5:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Canvas_1 = require("../Canvas");
 class SinusoidalWaveAnimation {
     constructor() {
         const canvas = document.getElementById('sinusoidal-wave-canvas');
@@ -158,22 +242,7 @@ class SinusoidalWaveAnimation {
 }
 exports.SinusoidalWaveAnimation = SinusoidalWaveAnimation;
 
-},{"./Canvas":2}],4:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.mapBigArrayToSmallSize = (array, size) => {
-    const newArray = new Uint8Array(array.length / size);
-    for (let i = size - 1; i < array.length; i += size) {
-        let sum = 0;
-        for (let j = i - size + 1; j <= i; j++) {
-            sum += array[j];
-        }
-        newArray[~~(i / size)] = sum / size;
-    }
-    return newArray;
-};
-
-},{}],5:[function(require,module,exports){
+},{"../Canvas":1}],6:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -186,8 +255,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    const { BarsAnimation } = yield Promise.resolve().then(() => require('./BarsAnimation'));
-    const { SinusoidalWaveAnimation } = yield Promise.resolve().then(() => require('./SinusoidalWaveAnimation'));
+    const { BarsAnimation } = yield Promise.resolve().then(() => require('./animations/BarsAnimation'));
+    const { SinusoidalWaveAnimation } = yield Promise.resolve().then(() => require('./animations/SinusoidalWaveAnimation'));
+    const { CircularAnimation } = yield Promise.resolve().then(() => require('./animations/CircularAnimation'));
     let analyzer;
     let animationRunning = true;
     let isInit = true;
@@ -196,7 +266,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
     const byteTimeDomainDataArray = new Uint8Array(1024);
     const allAnimations = [
         new BarsAnimation(),
-        new SinusoidalWaveAnimation()
+        new SinusoidalWaveAnimation(),
+        new CircularAnimation()
     ];
     const stopAllAnimations = () => {
         animationRunning = false;
@@ -232,4 +303,4 @@ Object.defineProperty(exports, "__esModule", { value: true });
     };
 }))();
 
-},{"./BarsAnimation":1,"./SinusoidalWaveAnimation":3}]},{},[5]);
+},{"./animations/BarsAnimation":3,"./animations/CircularAnimation":4,"./animations/SinusoidalWaveAnimation":5}]},{},[6]);
