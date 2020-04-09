@@ -31,22 +31,12 @@ export class CircularAnimation implements ICanvasAnimation {
             centerX, centerY, this.baseCircularRadius - 5, this.backGroundColor);
     }
 
-    private drawLineAtAngle(sX: number, sY: number, length: number, angle=0, color='white', thickness=1) {
-        let eX = length * Math.cos(angle);
-        let eY = length * Math.sin(angle);
-
-        eX += sX;
-        eY += sY;
-
-        this.helper.drawLine(sX, sY, eX, eY, thickness, color);
-    }
-
     private drawLines() {
         for (let i = 0; i < this.byteFrequencyDataArray.length; i++) {
             const angle = i + this.rotationAngle;
             const length =
                 this.byteFrequencyDataArray[i] / 4 + this.baseCircularRadius;
-            this.drawLineAtAngle(
+            this.helper.drawLineAtAngle(
                 this.helper.width / 2,
                 this.helper.height / 2,
                 length,

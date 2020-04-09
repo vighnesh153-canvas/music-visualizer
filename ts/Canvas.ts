@@ -98,6 +98,16 @@ export class Canvas {
         this.canvasContext.fillText(text, x, y);
     }
 
+    drawLineAtAngle(sX: number, sY: number, length: number, angle=0, color='white', thickness=1) {
+        let eX = length * Math.cos(angle);
+        let eY = length * Math.sin(angle);
+
+        eX += sX;
+        eY += sY;
+
+        this.drawLine(sX, sY, eX, eY, thickness, color);
+    }
+
     translate(x: number, y: number) {
         this.canvasContext.translate(x, y);
     }

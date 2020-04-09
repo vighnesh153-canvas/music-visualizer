@@ -4,6 +4,7 @@ import { ICanvasAnimation } from "./IAnimation";
     const { BarsAnimation } = await import('./animations/BarsAnimation');
     const { SinusoidalWaveAnimation } = await import('./animations/SinusoidalWaveAnimation');
     const { CircularAnimation } = await import('./animations/CircularAnimation');
+    const { ParticlesAnimation } = await import('./animations/ParticlesAnimation');
 
     let analyzer: AnalyserNode;
     let animationRunning = true;
@@ -15,7 +16,8 @@ import { ICanvasAnimation } from "./IAnimation";
     const allAnimations: ICanvasAnimation[] = [
         new BarsAnimation(),
         new SinusoidalWaveAnimation(),
-        new CircularAnimation()
+        new CircularAnimation(),
+        new ParticlesAnimation()
     ];
 
     const stopAllAnimations = () => {
@@ -34,7 +36,6 @@ import { ICanvasAnimation } from "./IAnimation";
             isInit = false;
         }
 
-        animationRunning = true;
         analyzer.fftSize = 2048;
         analyzer.smoothingTimeConstant = 0.9;
         analyzer.getByteFrequencyData(byteFrequencyDataArray);
@@ -53,7 +54,10 @@ import { ICanvasAnimation } from "./IAnimation";
         console.log('App bootstrapping!');
 
         audioElement = document.querySelector('audio');
-        audioElement.addEventListener('play', animateAll);
+        audioElement.addEventListener('play', () => {
+            animationRunning = true;
+            animateAll();
+        });
         audioElement.addEventListener('pause', stopAllAnimations);
 
         console.log('App bootstrapped.');
