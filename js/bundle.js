@@ -186,7 +186,7 @@ class CircularAnimation {
             const length = this.byteFrequencyDataArray[i] / 4 + this.baseCircularRadius;
             this.helper.drawLineAtAngle(this.helper.width / 2, this.helper.height / 2, length, angle * Math.PI / 180);
         }
-        this.rotationAngle += 0.1;
+        this.rotationAngle += 0.2;
         this.rotationAngle %= 360;
     }
     drawAll() {
