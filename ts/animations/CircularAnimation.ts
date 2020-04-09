@@ -43,7 +43,7 @@ export class CircularAnimation implements ICanvasAnimation {
                 angle * Math.PI / 180
             );
         }
-        this.rotationAngle += 0.1;
+        this.rotationAngle += 0.2;
         this.rotationAngle %= 360;
     }
 
