@@ -82,6 +82,13 @@ class Canvas {
         this.canvasContext.fillStyle = color;
         this.canvasContext.fillText(text, x, y);
     }
+    drawLineAtAngle(sX, sY, length, angle = 0, color = 'white', thickness = 1) {
+        let eX = length * Math.cos(angle);
+        let eY = length * Math.sin(angle);
+        eX += sX;
+        eY += sY;
+        this.drawLine(sX, sY, eX, eY, thickness, color);
+    }
     translate(x, y) {
         this.canvasContext.translate(x, y);
     }
@@ -173,18 +180,11 @@ class CircularAnimation {
         this.helper.drawFilledCircle(centerX, centerY, this.baseCircularRadius, 'white');
         this.helper.drawFilledCircle(centerX, centerY, this.baseCircularRadius - 5, this.backGroundColor);
     }
-    drawLineAtAngle(sX, sY, length, angle = 0, color = 'white', thickness = 1) {
-        let eX = length * Math.cos(angle);
-        let eY = length * Math.sin(angle);
-        eX += sX;
-        eY += sY;
-        this.helper.drawLine(sX, sY, eX, eY, thickness, color);
-    }
     drawLines() {
         for (let i = 0; i < this.byteFrequencyDataArray.length; i++) {
             const angle = i + this.rotationAngle;
             const length = this.byteFrequencyDataArray[i] / 4 + this.baseCircularRadius;
-            this.drawLineAtAngle(this.helper.width / 2, this.helper.height / 2, length, angle * Math.PI / 180);
+            this.helper.drawLineAtAngle(this.helper.width / 2, this.helper.height / 2, length, angle * Math.PI / 180);
         }
         this.rotationAngle += 0.1;
         this.rotationAngle %= 360;
@@ -205,6 +205,89 @@ class CircularAnimation {
 exports.CircularAnimation = CircularAnimation;
 
 },{"../Canvas":1,"../Utility":2}],5:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Canvas_1 = require("../Canvas");
+const Utility_1 = require("../Utility");
+class Particle {
+    constructor() {
+        this.velocityX = 0;
+        this.velocityY = 0;
+        this.huntTarget = -1;
+    }
+    update(frequency) {
+        this.y += this.velocityY;
+        this.velocityY += Particle.gravity;
+        if (this.huntTarget >= 0) {
+            if (this.y < this.huntTarget) {
+                this.velocityY = 0;
+                this.huntTarget = -1;
+            }
+        }
+        if (this.y >= Particle.bottomMax) {
+            this.y = Particle.helper.height - frequency[~~(this.x / 2)] / 2;
+            this.y =
+                Math.min(Particle.bottomMax - Particle.radius * 2, this.y);
+            this.huntTarget = this.y;
+            this.y = Particle.bottomMax - Particle.radius;
+            this.velocityY = -5;
+        }
+        if (this.y <= 0) {
+            this.y = 5;
+            this.velocityY = 0;
+        }
+    }
+    draw() {
+        Particle.helper.drawFilledCircle(this.x, this.y, Particle.radius, Particle.color);
+    }
+    process(frequency) {
+        this.update(frequency);
+        this.draw();
+    }
+}
+Particle.radius = 1;
+Particle.color = 'red';
+Particle.gravity = 0.1;
+class ParticlesAnimation {
+    constructor() {
+        this.fftSize = 512;
+        this.backGroundColor = 'black';
+        this.byteFrequencyDataArray = new Uint8Array(~~(this.fftSize / 2));
+        const canvas = document.getElementById('particles-animation-canvas');
+        this.helper = new Canvas_1.Canvas(canvas);
+        Particle.rightMax = this.helper.width;
+        Particle.bottomMax = this.helper.height;
+        Particle.helper = this.helper;
+        this.generateParticles();
+    }
+    generateParticles() {
+        this.particles = [];
+        for (let i = 0; i < 1810; i++) {
+            const p = new Particle();
+            p.x = ~~(i / 6);
+            p.y = ~~(Math.random() * Particle.bottomMax);
+            if (p.x <= this.helper.width) {
+                this.particles.push(p);
+            }
+        }
+    }
+    clearBackground() {
+        const { helper, backGroundColor } = this;
+        const { width, height, drawFilledRect } = helper;
+        drawFilledRect(0, 0, width, height, backGroundColor);
+    }
+    processParticles() {
+        this.particles.forEach(p => p.process(this.byteFrequencyDataArray));
+    }
+    animate(frequency, time) {
+        this.clearBackground();
+        this.byteFrequencyDataArray = Utility_1.mapBigArrayToSmallSize(frequency, 4);
+        this.processParticles();
+    }
+}
+exports.ParticlesAnimation = ParticlesAnimation;
+
+},{"../Canvas":1,"../Utility":2}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Canvas_1 = require("../Canvas");
@@ -242,7 +325,7 @@ class SinusoidalWaveAnimation {
 }
 exports.SinusoidalWaveAnimation = SinusoidalWaveAnimation;
 
-},{"../Canvas":1}],6:[function(require,module,exports){
+},{"../Canvas":1}],7:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -258,6 +341,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
     const { BarsAnimation } = yield Promise.resolve().then(() => require('./animations/BarsAnimation'));
     const { SinusoidalWaveAnimation } = yield Promise.resolve().then(() => require('./animations/SinusoidalWaveAnimation'));
     const { CircularAnimation } = yield Promise.resolve().then(() => require('./animations/CircularAnimation'));
+    const { ParticlesAnimation } = yield Promise.resolve().then(() => require('./animations/ParticlesAnimation'));
     let analyzer;
     let animationRunning = true;
     let isInit = true;
@@ -267,7 +351,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
     const allAnimations = [
         new BarsAnimation(),
         new SinusoidalWaveAnimation(),
-        new CircularAnimation()
+        new CircularAnimation(),
+        new ParticlesAnimation()
     ];
     const stopAllAnimations = () => {
         animationRunning = false;
@@ -281,7 +366,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
             analyzer.connect(audioContext.destination);
             isInit = false;
         }
-        animationRunning = true;
         analyzer.fftSize = 2048;
         analyzer.smoothingTimeConstant = 0.9;
         analyzer.getByteFrequencyData(byteFrequencyDataArray);
@@ -296,11 +380,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
     window.onload = () => {
         console.log('App bootstrapping!');
         audioElement = document.querySelector('audio');
-        audioElement.addEventListener('play', animateAll);
+        audioElement.addEventListener('play', () => {
+            animationRunning = true;
+            animateAll();
+        });
         audioElement.addEventListener('pause', stopAllAnimations);
         console.log('App bootstrapped.');
         console.log('Waiting for user events to process!');
     };
 }))();
 
-},{"./animations/BarsAnimation":3,"./animations/CircularAnimation":4,"./animations/SinusoidalWaveAnimation":5}]},{},[6]);
+},{"./animations/BarsAnimation":3,"./animations/CircularAnimation":4,"./animations/ParticlesAnimation":5,"./animations/SinusoidalWaveAnimation":6}]},{},[7]);
